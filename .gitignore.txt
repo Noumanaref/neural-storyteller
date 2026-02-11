@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+venv/
+env/
+ENV/
+.venv/
+virtualenv/
+.envrc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Large files (add if your model >100MB)
+*.pth
+*.pt
+*.h5
+*.pkl
