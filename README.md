@@ -109,13 +109,7 @@ neural-storyteller/
 
 ---
 
-## 📈 **Performance**
 
-| **Epoch** | **Train Loss** | **Val Loss** | **BLEU-4** |
-|-----------|---------------|-------------|------------|
-| 10 | 3.68 | 3.92 | 5.3% |
-| 20 | 2.95 | 3.41 | 11.2% |
-| 25 | 2.78 | 3.32 | 13.5% |
 
 *Note: State-of-the-art on Flickr30k is 22-25% BLEU-4 with 100+ epochs*
 
