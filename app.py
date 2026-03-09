@@ -9,15 +9,16 @@ from collections import Counter
 import numpy as np
 import base64
 from io import BytesIO
+import time
 
 # ------------------------------------------------------------------
 # 0. PAGE CONFIGURATION (MUST BE FIRST)
 # ------------------------------------------------------------------
 st.set_page_config(
-    page_title="Neural Storyteller | AI Image Captioning",
-    page_icon="🖼️",
+    page_title="Vision AI Studio | Professional Image Captioning",
+    page_icon="🎯",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ------------------------------------------------------------------
@@ -93,127 +94,476 @@ class Seq2Seq(nn.Module):
         return outputs
 
 # ------------------------------------------------------------------
-# 2. ENTERPRISE CSS STYLING
+# 2. PREMIUM CSS STYLING
 # ------------------------------------------------------------------
 
 def load_css():
     st.markdown("""
     <style>
-        /* Import Inter Font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* Import Premium Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
         
-        /* Global Typography & Colors */
+        /* Global Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         html, body, [class*="css"] {
-            font-family: 'Inter', sans-serif;
-            color: #1E293B; /* Slate 800 */
+            font-family: 'DM Sans', sans-serif;
+            color: #1a1a2e;
+            overflow-x: hidden;
         }
         
-        /* Background */
+        /* Animated Gradient Background */
         .stApp {
-            background-color: #F8FAFC; /* Slate 50 */
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
         }
         
-        /* Hide Default Streamlit Elements */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Noise Texture Overlay */
+        .stApp::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Hide Streamlit Branding */
         #MainMenu {visibility: hidden;}
         header {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stDeployButton {display: none;}
         
-        /* Typography */
-        h1, h2, h3 {
-            color: #0F172A; /* Slate 900 */
-            font-weight: 600;
-            letter-spacing: -0.025em;
-        }
-        
-        /* Card Layouts */
-        .custom-card {
-            background-color: #FFFFFF;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            border: 1px solid #E2E8F0;
-            margin-bottom: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        /* Main Container */
+        .main .block-container {
+            padding-top: 2rem;
+            padding-bottom: 4rem;
+            max-width: 1400px;
+            position: relative;
+            z-index: 2;
         }
         
-        .custom-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-        }
-
-        /* Metrics Styling */
-        div[data-testid="metric-container"] {
-            background-color: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        /* Buttons */
-        .stButton > button {
-            background-color: #1E3A8A; /* Blue 900 */
-            color: #FFFFFF;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            width: 100%;
-            transition: all 0.2s ease;
-        }
-        .stButton > button:hover {
-            background-color: #1E40AF; /* Blue 800 */
-            color: #FFFFFF;
-            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.3);
+        /* ========== HEADER SECTION ========== */
+        .hero-header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 3rem 3rem 2.5rem 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
         }
         
-        /* Secondary Download Button */
-        .download-btn {
-            display: block;
-            width: 100%;
-            text-align: center;
-            background-color: #F1F5F9;
-            color: #334155;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            border: 1px solid #CBD5E1;
-            transition: all 0.2s ease;
-            margin-top: 12px;
-        }
-        .download-btn:hover {
-            background-color: #E2E8F0;
-            color: #0F172A;
+        .hero-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
         }
         
-        /* Image Preview Box */
-        .image-preview {
-            border: 2px dashed #CBD5E1;
-            border-radius: 12px;
-            padding: 8px;
-            background: #FFFFFF;
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-20px, 20px) rotate(180deg); }
         }
         
-        /* Result Caption Text */
-        .result-caption {
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        
+        .hero-subtitle {
             font-size: 1.25rem;
-            line-height: 1.75rem;
-            color: #0F172A;
-            font-weight: 500;
-            padding: 20px;
-            background-color: #F8FAFC;
-            border-left: 4px solid #1E3A8A;
-            border-radius: 0 8px 8px 0;
-            margin: 16px 0;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 2rem;
         }
         
-        /* Footer */
-        .footer {
-            text-align: center;
+        .stats-bar {
+            display: flex;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        
+        .stat-label {
             font-size: 0.875rem;
-            color: #64748B;
-            padding-top: 32px;
-            margin-top: 48px;
-            border-top: 1px solid #E2E8F0;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* ========== CARDS ========== */
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .premium-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(139,92,246,0.3);
+            border-color: rgba(139,92,246,0.5);
+        }
+        
+        .premium-card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        /* ========== UPLOAD ZONE ========== */
+        .upload-container {
+            margin-top: 1.5rem;
+        }
+        
+        [data-testid="stFileUploader"] {
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(139,92,246,0.5);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        [data-testid="stFileUploader"]:hover {
+            border-color: rgba(139,92,246,0.8);
+            background: rgba(139,92,246,0.1);
+        }
+        
+        [data-testid="stFileUploader"] section {
+            border: none !important;
+        }
+        
+        [data-testid="stFileUploader"] button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139,92,246,0.4);
+        }
+        
+        [data-testid="stFileUploader"] button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(139,92,246,0.6);
+        }
+        
+        /* Image Preview */
+        .image-preview-container {
+            margin-top: 2rem;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        /* ========== BUTTONS ========== */
+        .stButton > button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(139,92,246,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stButton > button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .stButton > button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(139,92,246,0.6);
+        }
+        
+        /* ========== RESULTS DISPLAY ========== */
+        .result-container {
+            background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(99,102,241,0.1) 100%);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-container::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-family: 'Playfair Display', serif;
+            font-size: 8rem;
+            color: rgba(139,92,246,0.1);
+            line-height: 1;
+        }
+        
+        .caption-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            line-height: 1.6;
+            color: #ffffff;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+        }
+        
+        /* ========== METRICS ========== */
+        div[data-testid="metric-container"] {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+        
+        div[data-testid="metric-container"] > label {
+            color: rgba(255,255,255,0.7) !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        div[data-testid="metric-container"] > div {
+            color: #ffffff !important;
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+        }
+        
+        /* ========== DOWNLOAD BUTTON ========== */
+        .download-btn {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            color: #ffffff;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .download-btn:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+            border-color: rgba(139,92,246,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(139,92,246,0.3);
+        }
+        
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255,255,255,0.4);
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        .empty-state-text {
+            font-size: 1.125rem;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* ========== FOOTER ========== */
+        .custom-footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: #8b5cf6;
+        }
+        
+        .footer-text {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.875rem;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: rgba(139,92,246,0.2);
+            color: rgba(255,255,255,0.8);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.25rem;
+            border: 1px solid rgba(139,92,246,0.3);
+        }
+        
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            .stats-bar {
+                gap: 1.5rem;
+            }
+            .caption-text {
+                font-size: 1.25rem;
+            }
+        }
+        
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* ========== LOADING SPINNER ========== */
+        .stSpinner > div {
+            border-color: #8b5cf6 !important;
+            border-right-color: transparent !important;
+        }
+        
+        /* File uploader text color */
+        [data-testid="stFileUploader"] label, 
+        [data-testid="stFileUploader"] small,
+        [data-testid="stFileUploader"] p {
+            color: rgba(255,255,255,0.8) !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -224,7 +574,7 @@ def load_css():
 
 DEVICE = torch.device('cpu')
 
-@st.cache_resource(show_spinner="Loading AI Models...")
+@st.cache_resource(show_spinner="🔮 Initializing Neural Networks...")
 def load_resources():
     try:
         with open('vocab.pkl', 'rb') as f:
@@ -273,6 +623,7 @@ transform = transforms.Compose([
 # ------------------------------------------------------------------
 
 def generate_caption(model, feature_extractor, vocab, image, max_length=20):
+    start_time = time.time()
     with torch.no_grad():
         img_tensor = transform(image).unsqueeze(0)
         feature = feature_extractor(img_tensor)
@@ -304,19 +655,24 @@ def generate_caption(model, feature_extractor, vocab, image, max_length=20):
                 caption.append(vocab.itos[pred_word_idx])
                 inputs = torch.tensor([pred_word_idx])
         
-        return caption, attention_weights
+        processing_time = time.time() - start_time
+        return caption, attention_weights, processing_time
 
 def get_download_link(caption):
     b64 = base64.b64encode(caption.encode()).decode()
-    return f'<a href="data:file/txt;base64,{b64}" download="generated_caption.txt" class="download-btn">⬇️ Download Caption (.txt)</a>'
+    return f'<a href="data:file/txt;base64,{b64}" download="caption.txt" class="download-btn">⬇️ Download Caption</a>'
 
 def init_session_state():
     if 'generated_caption' not in st.session_state:
         st.session_state.generated_caption = None
     if 'confidence' not in st.session_state:
         st.session_state.confidence = None
+    if 'processing_time' not in st.session_state:
+        st.session_state.processing_time = None
     if 'current_image_name' not in st.session_state:
         st.session_state.current_image_name = None
+    if 'image_dimensions' not in st.session_state:
+        st.session_state.image_dimensions = None
 
 # ------------------------------------------------------------------
 # 5. MAIN APPLICATION
@@ -326,100 +682,166 @@ def main():
     load_css()
     init_session_state()
     
-    # --- SIDEBAR NAVIGATION ---
-    with st.sidebar:
-        st.image("https://cdn-icons-png.flaticon.com/512/2103/2103130.png", width=60) # Placeholder icon
-        st.title("Neural Storyteller")
-        st.markdown("---")
-        
-        st.markdown("### 📋 Instructions")
-        st.markdown("""
-        1. **Upload** a clear image (JPG/PNG).
-        2. Wait for the preview to load.
-        3. Click **Generate Caption**.
-        4. Review the AI output and confidence metrics.
-        """)
-        
-        st.markdown("### ⚙️ System Status")
-        model, feature_extractor, vocab = load_resources()
-        if model and vocab:
-            st.success("✅ Models Online")
-            st.caption(f"Vocabulary Size: {len(vocab)} words")
-        else:
-            st.error("❌ System Offline (Missing files)")
-
-        st.markdown("---")
-        st.caption("v2.0.0 Enterprise Edition | © 2026")
-
-    # --- MAIN CONTENT AREA ---
-    st.markdown("## 📷 AI Image Captioning Module")
-    st.markdown("Upload imagery to automatically generate descriptive, contextual narratives using deep learning.")
+    # Load resources
+    model, feature_extractor, vocab = load_resources()
     
+    # ========== HERO HEADER ==========
+    st.markdown(f"""
+    <div class="hero-header fade-in-up">
+        <h1 class="hero-title">Vision AI Studio</h1>
+        <p class="hero-subtitle">
+            Transform images into intelligent narratives using state-of-the-art deep learning.
+            Our advanced neural architecture combines ResNet-50 feature extraction with LSTM sequence generation.
+        </p>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value">{'3' if model else '0'}</div>
+                <div class="stat-label">Models Active</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">&lt;1s</div>
+                <div class="stat-label">Processing Speed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{len(vocab) if vocab else '0'}</div>
+                <div class="stat-label">Vocabulary Size</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">JPG • PNG • JPEG</div>
+                <div class="stat-label">Supported Formats</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Check if models loaded
     if model is None or vocab is None:
-        st.warning("⚠️ Critical resources are missing. Please verify 'vocab.pkl' and 'caption_model.pth' exist in the root directory.")
+        st.error("⚠️ **System Offline**: Critical resources missing. Please ensure 'vocab.pkl' and 'caption_model.pth' are in the application directory.")
         return
-
-    # Use a two-column layout for desktop
-    col_left, col_right = st.columns([1.2, 1], gap="large")
     
+    # ========== MAIN CONTENT ==========
+    col_left, col_right = st.columns([1.3, 1], gap="large")
+    
+    # LEFT COLUMN - Upload & Input
     with col_left:
-        st.markdown("#### 1. Input Image")
-        uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'], help="Max file size 200MB.")
+        st.markdown("""
+        <div class="premium-card fade-in-up">
+            <div class="card-title">
+                <div class="card-icon">📸</div>
+                Image Upload
+            </div>
+        """, unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader(
+            "Drop your image here or click to browse",
+            type=['jpg', 'jpeg', 'png'],
+            help="Maximum file size: 200MB • Formats: JPG, JPEG, PNG",
+            label_visibility="collapsed"
+        )
         
         if uploaded_file is not None:
-            # Check if new image uploaded, reset state if true
+            # Reset state on new image
             if st.session_state.current_image_name != uploaded_file.name:
                 st.session_state.generated_caption = None
                 st.session_state.confidence = None
+                st.session_state.processing_time = None
                 st.session_state.current_image_name = uploaded_file.name
                 
             image = Image.open(uploaded_file).convert('RGB')
-            st.markdown('<div class="image-preview">', unsafe_allow_html=True)
-            st.image(image, use_column_width=True)
+            st.session_state.image_dimensions = image.size
+            
+            # Display image preview
+            st.markdown('<div class="image-preview-container">', unsafe_allow_html=True)
+            st.image(image, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Action Button
+            # Image metadata
+            file_size_mb = len(uploaded_file.getvalue()) / (1024 * 1024)
+            st.caption(f"📊 {uploaded_file.name} • {image.size[0]}×{image.size[1]}px • {file_size_mb:.2f} MB")
+            
+            # Generate button
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("🚀 Analyze & Generate Sequence", use_container_width=True):
-                with st.spinner("Processing visual features & querying LSTM..."):
-                    caption_words, att_weights = generate_caption(model, feature_extractor, vocab, image)
+            if st.button("🚀 Generate Caption", use_container_width=True):
+                with st.spinner("🔮 Analyzing visual features..."):
+                    caption_words, att_weights, proc_time = generate_caption(
+                        model, feature_extractor, vocab, image
+                    )
                     st.session_state.generated_caption = " ".join(caption_words)
                     st.session_state.confidence = np.mean(att_weights) if att_weights else 0
+                    st.session_state.processing_time = proc_time
+                    st.rerun()
         else:
-            # Empty State
-            st.info("💡 Awaiting visual input. Please upload an image to begin.")
-            
+            # Empty state
+            st.markdown("""
+            <div class="empty-state">
+                <div class="empty-state-icon">🖼️</div>
+                <p class="empty-state-text">Upload an image to begin analysis</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # RIGHT COLUMN - Results & Analysis
     with col_right:
-        st.markdown("#### 2. Generated Output")
+        st.markdown("""
+        <div class="premium-card fade-in-up">
+            <div class="card-title">
+                <div class="card-icon">✨</div>
+                Generated Caption
+            </div>
+        """, unsafe_allow_html=True)
         
         if st.session_state.generated_caption is not None:
-            # Display Result in Custom Styling
-            st.markdown(f'<div class="result-caption">{st.session_state.generated_caption.capitalize()}.</div>', unsafe_allow_html=True)
+            # Display caption
+            st.markdown(f"""
+            <div class="result-container">
+                <p class="caption-text">{st.session_state.generated_caption.capitalize()}.</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            # Display Metrics
-            m_col1, m_col2 = st.columns(2)
-            with m_col1:
-                st.metric(label="System Confidence", value=f"{st.session_state.confidence:.2%}")
-            with m_col2:
-                word_count = len(st.session_state.generated_caption.split())
-                st.metric(label="Sequence Length", value=f"{word_count} tokens")
-                
-            # Export Action
+            # Metrics
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 3. Export Data")
+            metric_col1, metric_col2, metric_col3 = st.columns(3)
+            
+            with metric_col1:
+                st.metric("Confidence", f"{st.session_state.confidence:.1%}")
+            
+            with metric_col2:
+                word_count = len(st.session_state.generated_caption.split())
+                st.metric("Tokens", f"{word_count}")
+            
+            with metric_col3:
+                st.metric("Speed", f"{st.session_state.processing_time:.2f}s")
+            
+            # Download button
+            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(get_download_link(st.session_state.generated_caption), unsafe_allow_html=True)
             
         else:
-            # Empty State for Right Column
+            # Empty state
             st.markdown("""
-            <div class="custom-card" style="text-align: center; color: #94A3B8; padding: 40px 20px;">
-                <h3 style="color: #CBD5E1; font-size: 3rem;">📝</h3>
-                <p>Output will appear here after analysis.</p>
+            <div class="empty-state">
+                <div class="empty-state-icon">💭</div>
+                <p class="empty-state-text">Caption will appear here after processing</p>
             </div>
             """, unsafe_allow_html=True)
-
-    # Footer
-    st.markdown('<div class="footer">Developed for advanced computer vision workflows. Requires GPU-accelerated environments for batch inference.</div>', unsafe_allow_html=True)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # ========== FOOTER ==========
+    st.markdown("""
+    <div class="custom-footer">
+        <div class="footer-content">
+            <span class="tech-badge">PyTorch</span>
+            <span class="tech-badge">ResNet-50</span>
+            <span class="tech-badge">LSTM</span>
+            <span class="tech-badge">Computer Vision</span>
+        </div>
+        <p class="footer-text">
+            Vision AI Studio © 2026 • Built with deep learning excellence
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
